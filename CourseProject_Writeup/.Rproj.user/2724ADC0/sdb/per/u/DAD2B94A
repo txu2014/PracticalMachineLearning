@@ -1,0 +1,17 @@
+{
+    "contents" : "rows\nfor (i in c(1:length(training)))\n{\n  if (sum(!is.na(training[,i]))\n}\n",
+    "created" : 1410884099132.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "259681014",
+    "id" : "DAD2B94A",
+    "lastKnownWriteTime" : 2314885530279477249,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

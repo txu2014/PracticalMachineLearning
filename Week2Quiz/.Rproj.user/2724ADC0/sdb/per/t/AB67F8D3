@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1410864807018.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "AB67F8D3",
+    "lastKnownWriteTime" : 7741240722073845761,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "mixtures",
+        "contentUrl" : "content?title=mixtures&file=d4b08468bd494481bcc6f87a47488902.htm",
+        "displayedObservations" : 1000,
+        "displayedVariables" : 9,
+        "totalObservations" : 1030,
+        "variables" : 9
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

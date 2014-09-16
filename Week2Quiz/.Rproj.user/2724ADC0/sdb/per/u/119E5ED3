@@ -1,0 +1,17 @@
+{
+    "contents" : "for (n in names(training))\n{\n  cutn <- cut2(training[n],g=5)\n  qplot(row.names(training), CompressiveStrength,color=cutn,data=training)\n  \n}",
+    "created" : 1410865431493.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "508248386",
+    "id" : "119E5ED3",
+    "lastKnownWriteTime" : 2319969770830561281,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
