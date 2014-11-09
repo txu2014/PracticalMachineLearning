@@ -11,11 +11,11 @@
     "project_path" : null,
     "properties" : {
         "caption" : "training",
-        "contentUrl" : "content?title=training&file=cdbca8d309fa4322b168058ff4a51fa6.htm",
-        "displayedObservations" : 1000,
+        "contentUrl" : "content?title=training&file=b9ec5b13a1ad43e7ae2e179e242623c0.htm",
+        "displayedObservations" : "1000",
         "displayedVariables" : 100,
-        "totalObservations" : 19622,
-        "variables" : 160
+        "totalObservations" : "19622",
+        "variables" : "53"
     },
     "source_on_save" : false,
     "type" : "r_dataframe"
