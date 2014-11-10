@@ -5,12 +5,13 @@ date: "Saturday, November 08, 2014"
 output: html_document
 ---
 
-###Background
+##Poeject Assignment
+####Background
 
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
 
 
-###Data 
+####Data 
 
 The training data for this project are available here: 
 
@@ -22,26 +23,30 @@ https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
 The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment. 
 
-###What you should submit
+####What you should submit
 
 The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases. 
 
-1. Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-).
+1. Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file descr]ibing your analysis. Please constrain the text of the writeup to < 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-).
 2. You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details. 
-###Reproducibility 
+####Reproducibility 
 Due to security concerns with the exchange of R code, your code will not be run during the evaluation by your classmates. Please be sure that if they download the repo, they will be able to view the compiled HTML version of your analysis. 
 
 ## Project Code
 
-####Prepare the R and Data
+####Prepare the R env and Data
 ```{r}
-#install.packages("caret")
-library(caret)
-set.seed(12345)
+# Create a tool function to install a required package before load it.
+call.packages <- function(mypkg) {
+  if(!is.element(mypkg, installed.packages()[,1]) ){install.packages(mypkg)}
+  library(mypkg,character.only = T)}
+
+call.packages("caret") 
+set.seed(12345) #set seed in random number generator for the sake of reproducibility.
+
 # Download the training and testing data if have not done so.
 #download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfil="./pml-training.csv",)
 #download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfil="./pml-testing.csv",)
-
 
 # Load training and testing data
 # Replace invalid strings as "NA"
@@ -54,7 +59,7 @@ dim(testingdata)
 training <- trainingdata[,colSums(is.na(testingdata))==0]
 testing <- testingdata[,colSums(is.na(testingdata))==0]
 
-# Delete irrelevent columns first 7 cols
+# Delete irrelevent columns [X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window, num_window]
 training  <-training[,-c(1:7)]
 testing <-testing[,-c(1:7)]
 
@@ -62,23 +67,20 @@ testing <-testing[,-c(1:7)]
 dim(training)
 dim(testing)
 
-```
-
-
-```{r}
-# Divide training data to subtraining and subtesting
+# Divide training data to subtraining and subtesting (75% subtraining, 25% subtesting)
 inTrain <- createDataPartition(y=training$classe, p=0.75, list=F,)
 subTraining <- training[inTrain,]
 subTesting <- training[-inTrain,]
-
 ```
 
+####Try various classification algorithm for comparison.
+Reference http://blog.revolutionanalytics.com/2012/08/cheat-sheet-for-prediction-and-classification-models-in-r.html
 
 ####Naive Bayes algorithm
 ```{r}
 # Use naiveBayes model to train and predict
 #install.packages("e1071")
-library(e1071)
+call.packages("e1071")
 model_nb <- naiveBayes(classe ~., data=subTraining)
 pred_nb <- predict(model_nb, subTesting, type="class")
 # Summarize naiveBayes results. 
@@ -87,20 +89,24 @@ res_nb <- confusionMatrix(pred_nb,subTesting$classe)
 res_nb
 ```
 
-####Random Forest algorithm
+####Neural Network algorithm
 ```{r}
-# Use randomForest model to train and predict
-#install.packages("randomForest")
-library(randomForest) #Random forest for classification and regression
-model_rf <- randomForest(classe ~., 
-                         data=subTraining,
-                         na.action=na.omit)
-pred_rf <- predict(model_rf, subTesting, type="class")
+call.packages("nnet")
+model_nn <- nnet(classe ~., data=subTraining, size=10,maxit=300,trace=F)
+pred_nn  <- predict(model_nn, subTesting, type="class")
+# Accuracy : 0.5540375    95% CI : (0.5399948, 0.5680159)  
+res_nn <- confusionMatrix(pred_nn,subTesting$classe)
+res_nn
+```
 
-# Summarize randomForest results. 
-# Accuracy=0.9955, 95% CI(0.9932, 0.9972)
-res_rf <- confusionMatrix(pred_rf,subTesting$classe)
-res_rf
+####Decision Tree algorithm
+```{r}
+call.packages("rpart")
+model_dt <- rpart(classe ~., data=subTraining, method="class")
+pred_dt  <- predict(model_dt, subTesting, type="class")
+#Accuracy : 0.740416 95% CI : (0.7279031, 0.7526421) 
+res_dt <- confusionMatrix(pred_dt,subTesting$classe)
+res_dt
 ```
 
 ####SVM algorithm
@@ -114,11 +120,47 @@ res_svm <- confusionMatrix(pred_svm,subTesting$classe)
 res_svm
 ```
 
+
+####Gradient Boosting Method algorithm
+not used here, seems only working with numeric y.
+```{r}
+#call.packages("gbm")
+#model_gbm <- gbm(classe ~., data=subTraining, distribution="multinomial",n.trees = 1000,interaction.depth=2)
+#pred_gbm <- predict(model_gbm, subTesting, n.trees=1000, type="link")
+#res_gbm <- confusionMatrix(round(pred_gbm,1),subTesting$classe)
+#res_gbm
+```
+
+
+####Bagging algorithm
+```{r}
+call.packages("ipred")
+model_bagging <- bagging(classe ~., data=subTraining)
+pred_bagging <- predict(model_bagging, subTesting)
+#Accuracy : 0.9851142 95% CI : (0.9813193, 0.9883142) 
+res_bagging <- confusionMatrix(pred_bagging, subTesting$classe)
+res_bagging 
+```
+####Random Forest (improved bagging) algorithm
+Random Forest is one of the most popular bagging models; in addition to selecting n training data out of N at each decision node of the tree, it randomly selects m input features from the total M input features (m ~ M^0.5). Then it learns a decision tree from that. Finally, each tree in the forest votes for the result.
+```{r}
+# Use randomForest model to train and predict
+#install.packages("randomForest")
+call.packages("randomForest") #Random forest for classification and regression
+model_rf <- randomForest(classe ~., data=subTraining, na.action=na.omit)
+pred_rf <- predict(model_rf, subTesting, type="class")
+# Summarize randomForest results. 
+# Accuracy=0.9955, 95% CI(0.9932, 0.9972)
+res_rf <- confusionMatrix(pred_rf,subTesting$classe)
+res_rf
+```
+
+
 ####Select the model
 Compare the accuracy of trained model on subTesting data, and choose highest accuracy model (randomForest).
 
 ```{r}
-df_res <- data.frame(res_nb$overall, res_svm$overall, res_rf$overall)
+df_res <- data.frame(res_nb$overall, res_dt$overall, res_svm$overall, res_nn$overall, res_bagging$overall, res_rf$overall)
 df_res
 ```
 
@@ -130,3 +172,4 @@ Apply the randomForest trained model on testing data, and get its testing result
 res <- predict(model_rf, testing, type="class")
 res
 ```
+
