@@ -1,0 +1,120 @@
+---
+title: "Week2Quiz"
+author: "T Xu"
+date: "Wednesday, November 12, 2014"
+output: html_document
+---
+
+###Question 1
+Load the Alzheimer's disease data using the commands:
+```{r}
+library(AppliedPredictiveModeling)
+library(caret)
+data(AlzheimerDisease)
+```
+Which of the following commands will create training and test sets with about 50% of the observations assigned to each?
+
+```{r}
+adData = data.frame(diagnosis,predictors)
+trainIndex = createDataPartition(diagnosis, p = 0.50,list=FALSE)
+training = adData[trainIndex,]
+testing = adData[-trainIndex,]
+```
+
+
+###Question 2
+Load the cement data using the commands:
+```{r]}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(975)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+Make a plot of the outcome (CompressiveStrength) versus the index of the samples. Color by each of the variables in the data set (you may find the cut2() function in the Hmisc package useful for turning continuous covariates into factors). What do you notice in these plots?
+
+```{r}
+library(Hmisc)
+index <- seq_along(1:nrow(training))
+ggplot(data = training, aes(x = index, y = CompressiveStrength)) + geom_point() + 
+    theme_bw()
+```
+
+###Question 3
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(975)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+Make a histogram and confirm the SuperPlasticizer variable is skewed. Normally you might use the log transform to try to make the data more symmetric. Why would that be a poor choice for this variable?
+
+```{r}
+histogram(training$Superplasticizer)
+#too many 0s, hence we cannot use log()
+sum(training$Superplasticizer==0)
+sum(training$Superplasticizer!=0)
+```
+
+
+###Question 4
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+Find all the predictor variables in the training set that begin with IL. Perform principal components on these variables with the preProcess() function from the caret package. Calculate the number of principal components needed to capture 90% of the variance. How many are there?
+
+```{r}
+IL_str <- grep("^IL", colnames(training), value = TRUE)
+preProc <- preProcess(training[, IL_str], method = "pca", thresh = 0.9)
+#threshold=90%, number of PC=9
+#trreshold=80%, number of PC=7
+preProc$rotation
+```
+
+
+###Question 5
+```{r}
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+Create a training data set consisting of only the predictors with variable names beginning with IL and the diagnosis. Build two predictive models, one using the predictors as they are and one using PCA with principal components explaining 80% of the variance in the predictors. Use method="glm" in the train function. What is the accuracy of each method in the test set? Which is more accurate?
+```{r}
+#modify the training set to contain only disgnosis, and IL* predictors.
+set.seed(3433)
+## grep the predictors starting with 'IL'
+IL_str <- grep("^IL", colnames(training), value = TRUE)
+## make a subset of these predictors
+predictors_IL <- predictors[, IL_str]
+df <- data.frame(diagnosis, predictors_IL)
+inTrain = createDataPartition(df$diagnosis, p = 3/4)[[1]]
+training = df[inTrain, ]
+testing = df[-inTrain, ]
+#install.packages("e1071")
+library(e1071)
+#Train without PCA
+model_NoPCA <- train(diagnosis ~., method="glm",data=training)
+pred_NoPCA <- predict(model_NoPCA, testing)
+#No PCA Accuracy resuls
+confusionMatrix(pred_NoPCA, testing$diagnosis)$overall
+
+#Train with PCA preprocessing
+model_PCA <- train(diagnosis ~.,method="glm",data=training,preProcess="pca",trControl=trainControl(preProcOptions = list(thresh=0.8)))
+pred_PCA <- predict(model_PCA,testing)
+#PCA Accuracy resuls
+confusionMatrix(pred_PCA,testing$diagnosis)$overall
+```

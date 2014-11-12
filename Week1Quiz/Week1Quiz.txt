@@ -2,6 +2,7 @@ Question 1
 Which of the following are steps in building a machine learning algorithm?
 
 Deciding on an algorithm.
+Collecting data to answer the question
 
 Question 2
 Suppose we build a prediction algorithm on a data set and it is 100% accurate on that data set. Why might the algorithm not work well if we collect a new data set?
@@ -17,9 +18,15 @@ Question 4
 What are some common error rates for predicting binary variables (i.e. variables with two possible values like yes/no, disease/normal, clicked/didn't click)?
 
 Predictive value of a positive
-
+Accuracy
+Specificity
 
 Question 5
 Suppose that we have created a machine learning algorithm that predicts whether a link will be clicked with 99% sensitivity and 99% specificity. The rate the link is clicked is 1/1000 of visits to a website. If we predict the link will be clicked on a specific visit, what is the probability it will actually be clicked?
 
 9%
+
+    Y       N
+Y   990     10000
+N   10      990000
+Total1000   1000000
