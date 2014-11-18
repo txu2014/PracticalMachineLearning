@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1416269879816.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "84E61E65",
+    "lastKnownWriteTime" : 7741240722073845761,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "olive",
+        "contentUrl" : "content?title=olive&file=4529dafa0fbf4ff1ababf6728dcbecc9.htm",
+        "displayedObservations" : 572,
+        "displayedVariables" : 9,
+        "totalObservations" : 572,
+        "variables" : 9
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

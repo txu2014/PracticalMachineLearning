@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1416272669520.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "EE375736",
+    "lastKnownWriteTime" : 13229740524830817,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "vowel.test",
+        "contentUrl" : "content?title=vowel.test&file=e135535a35db49bf964e9a235016591b.htm",
+        "displayedObservations" : "462",
+        "displayedVariables" : 11,
+        "totalObservations" : "462",
+        "variables" : "11"
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

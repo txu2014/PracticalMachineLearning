@@ -121,18 +121,16 @@ res_svm
 ```
 
 
-####Gradient Boosting Method algorithm
-not used here, seems only working with numeric y.
+####GBM (Gradient Boosting Method) algorithm
 ```{r}
-#call.packages("gbm")
-#model_gbm <- gbm(classe ~., data=subTraining, distribution="multinomial",n.trees = 1000,interaction.depth=2)
-#pred_gbm <- predict(model_gbm, subTesting, n.trees=1000, type="link")
-#res_gbm <- confusionMatrix(round(pred_gbm,1),subTesting$classe)
-#res_gbm
+#model_gbm <- train(classe ~., method="gbm", data=subTraining, verbose=F)
+#pred_gbm <- predict(model_gbm, subTesting)
+#res_gbm <- confusionMatrix(pred_gbm, subTesting$classe)
+
 ```
 
-
 ####Bagging algorithm
+Bootstraping and Aggregation method.
 ```{r}
 call.packages("ipred")
 model_bagging <- bagging(classe ~., data=subTraining)
@@ -141,8 +139,20 @@ pred_bagging <- predict(model_bagging, subTesting)
 res_bagging <- confusionMatrix(pred_bagging, subTesting$classe)
 res_bagging 
 ```
+
 ####Random Forest (improved bagging) algorithm
-Random Forest is one of the most popular bagging models; in addition to selecting n training data out of N at each decision node of the tree, it randomly selects m input features from the total M input features (m ~ M^0.5). Then it learns a decision tree from that. Finally, each tree in the forest votes for the result.
+Algorithm
+1) Boorstrap sampled;
+2) At each split, bootstrap variables
+3) Grow multiple trees and vote
+
+Pros:
+* Accuracy
+
+Cons:
+* Slow speed
+* Interpretability
+* Overfitting -> important to do cross-validation.
 ```{r}
 # Use randomForest model to train and predict
 #install.packages("randomForest")

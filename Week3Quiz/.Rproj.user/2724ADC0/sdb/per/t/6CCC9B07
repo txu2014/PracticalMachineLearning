@@ -1,0 +1,22 @@
+{
+    "contents" : "",
+    "created" : 1416270714390.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6CCC9B07",
+    "lastKnownWriteTime" : 7741240723082584096,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "caption" : "testSA",
+        "contentUrl" : "content?title=testSA&file=10f19d6ecade4627899e7608895bbe0e.htm",
+        "displayedObservations" : 231,
+        "displayedVariables" : 11,
+        "totalObservations" : 231,
+        "variables" : 10
+    },
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}
