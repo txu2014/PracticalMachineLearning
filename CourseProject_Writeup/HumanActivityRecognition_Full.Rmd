@@ -36,7 +36,12 @@ Due to security concerns with the exchange of R code, your code will not be run 
 
 ####Prepare the R env and Data
 ```{r}
-library("caret") 
+# Create a tool function to install a required package before load it.
+call.packages <- function(mypkg) {
+  if(!is.element(mypkg, installed.packages()[,1]) ){install.packages(mypkg)}
+  library(mypkg,character.only = T)}
+
+call.packages("caret") 
 set.seed(12345) #set seed in random number generator for the sake of reproducibility.
 
 # Download the training and testing data if have not done so.
@@ -61,11 +66,7 @@ testing <-testing[,-c(1:7)]
 # Take a look at the data after clearning
 dim(training)
 dim(testing)
-```
 
-####Cross Validation
-Split the original training data to `subTraining`(75%) and `subTesting`(25%) for cross validation.  Fit the model using `subTraining` data and then predit using `subTesting` data.  The accuracy of prediction should reflect the accuracy of the model.
-```{r}
 # Divide training data to subtraining and subtesting (75% subtraining, 25% subtesting)
 inTrain <- createDataPartition(y=training$classe, p=0.75, list=F,)
 subTraining <- training[inTrain,]
@@ -75,65 +76,106 @@ subTesting <- training[-inTrain,]
 ####Try various classification algorithm for comparison.
 Reference http://blog.revolutionanalytics.com/2012/08/cheat-sheet-for-prediction-and-classification-models-in-r.html
 
+####Naive Bayes algorithm
+```{r}
+# Use naiveBayes model to train and predict
+#install.packages("e1071")
+call.packages("e1071")
+model_nb <- naiveBayes(classe ~., data=subTraining)
+pred_nb <- predict(model_nb, subTesting, type="class")
+# Summarize naiveBayes results. 
+# Accuracy=0.5506, 95% CI(0.5365, 0.5646)
+res_nb <- confusionMatrix(pred_nb,subTesting$classe)
+res_nb
+```
+
+####Neural Network algorithm
+```{r}
+call.packages("nnet")
+model_nn <- nnet(classe ~., data=subTraining, size=10,maxit=300,trace=F)
+pred_nn  <- predict(model_nn, subTesting, type="class")
+# Accuracy : 0.5540375    95% CI : (0.5399948, 0.5680159)  
+res_nn <- confusionMatrix(pred_nn,subTesting$classe)
+res_nn
+```
+
 ####Decision Tree algorithm
 ```{r}
-library("rpart")
+call.packages("rpart")
 model_dt <- rpart(classe ~., data=subTraining, method="class")
 pred_dt  <- predict(model_dt, subTesting, type="class")
+#Accuracy : 0.740416 95% CI : (0.7279031, 0.7526421) 
 res_dt <- confusionMatrix(pred_dt,subTesting$classe)
 res_dt
 ```
 
-####Bagging algorithm
-Bootstraping Aggregating method.
+####SVM algorithm
 ```{r}
-library("ipred")
+# Use SVM to train and predict
+model_svm <- svm(classe ~., data=subTraining,type="C-classification")
+pred_svm <- predict(model_svm, subTesting, type="class")
+# Summarize SVM results. 
+# Accuracy= 0.9462, 95% CI(0.9395, 0.9523)
+res_svm <- confusionMatrix(pred_svm,subTesting$classe)
+res_svm
+```
+
+
+####GBM (Gradient Boosting Method) algorithm
+```{r}
+#model_gbm <- train(classe ~., method="gbm", data=subTraining, verbose=F)
+#pred_gbm <- predict(model_gbm, subTesting)
+#res_gbm <- confusionMatrix(pred_gbm, subTesting$classe)
+
+```
+
+####Bagging algorithm
+Bootstraping and Aggregation method.
+```{r}
+call.packages("ipred")
 model_bagging <- bagging(classe ~., data=subTraining)
 pred_bagging <- predict(model_bagging, subTesting)
+#Accuracy : 0.9851142 95% CI : (0.9813193, 0.9883142) 
 res_bagging <- confusionMatrix(pred_bagging, subTesting$classe)
 res_bagging 
 ```
 
 ####Random Forest (improved bagging) algorithm
-Improved Bagging algorithm
-
+Algorithm
 1) Boorstrap sampled;
 2) At each split, bootstrap variables
 3) Grow multiple trees and vote
 
 Pros:
-
-- Accuracy
+* Accuracy
 
 Cons:
-
-- Slow speed
-- Interpretability
-- Overfitting -> important to do cross-validation.
-
+* Slow speed
+* Interpretability
+* Overfitting -> important to do cross-validation.
 ```{r}
 # Use randomForest model to train and predict
 #install.packages("randomForest")
-library("randomForest") #Random forest for classification and regression
+call.packages("randomForest") #Random forest for classification and regression
 model_rf <- randomForest(classe ~., data=subTraining, na.action=na.omit)
 pred_rf <- predict(model_rf, subTesting, type="class")
 # Summarize randomForest results. 
+# Accuracy=0.9955, 95% CI(0.9932, 0.9972)
 res_rf <- confusionMatrix(pred_rf,subTesting$classe)
 res_rf
 ```
 
 
 ####Select the model
-Compare the accuracy of trained model on subTesting data, and choose highest accuracy model => randomForest.
-We observe slightly accuracy improvement for RandomForest compared with genetic Bagging algorithm.  
+Compare the accuracy of trained model on subTesting data, and choose highest accuracy model (randomForest).
+
 ```{r}
-df_res <- data.frame(res_dt$overall, res_bagging$overall, res_rf$overall)
+df_res <- data.frame(res_nb$overall, res_dt$overall, res_svm$overall, res_nn$overall, res_bagging$overall, res_rf$overall)
 df_res
 ```
 
 ####Final Prediction Results
 Apply the randomForest trained model on testing data, and get its testing results. 
-RandomForest has 99.4% accuracy 95% CI : (0.992, 0.996), so I expect that less than 1 prediction can be wrong in 20 predictions.
 
 ```{r}
 # Predict testing results using trained model

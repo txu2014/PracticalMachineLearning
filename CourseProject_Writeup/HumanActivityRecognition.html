@@ -58,39 +58,42 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </div>
 
 
-<div id="background" class="section level3">
-<h3>Background</h3>
+<div id="poeject-assignment" class="section level2">
+<h2>Poeject Assignment</h2>
+<div id="background" class="section level4">
+<h4>Background</h4>
 <p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement  a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
 </div>
-<div id="data" class="section level3">
-<h3>Data</h3>
+<div id="data" class="section level4">
+<h4>Data</h4>
 <p>The training data for this project are available here:</p>
 <p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></p>
 <p>The test data are available here:</p>
 <p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></p>
 <p>The data for this project come from this source: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.</p>
 </div>
-<div id="what-you-should-submit" class="section level3">
-<h3>What you should submit</h3>
+<div id="what-you-should-submit" class="section level4">
+<h4>What you should submit</h4>
 <p>The goal of your project is to predict the manner in which they did the exercise. This is the “classe” variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.</p>
 <ol style="list-style-type: decimal">
-<li>Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file describing your analysis. Please constrain the text of the writeup to &lt; 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-).</li>
-<li>You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details. ###Reproducibility Due to security concerns with the exchange of R code, your code will not be run during the evaluation by your classmates. Please be sure that if they download the repo, they will be able to view the compiled HTML version of your analysis.</li>
+<li>Your submission should consist of a link to a Github repo with your R markdown and compiled HTML file descr]ibing your analysis. Please constrain the text of the writeup to &lt; 2000 words and the number of figures to be less than 5. It will make it easier for the graders if you submit a repo with a gh-pages branch so the HTML page can be viewed online (and you always want to make it easy on graders :-).</li>
+<li>You should also apply your machine learning algorithm to the 20 test cases available in the test data above. Please submit your predictions in appropriate format to the programming assignment for automated grading. See the programming assignment for additional details. ####Reproducibility Due to security concerns with the exchange of R code, your code will not be run during the evaluation by your classmates. Please be sure that if they download the repo, they will be able to view the compiled HTML version of your analysis.</li>
 </ol>
+</div>
 </div>
 <div id="project-code" class="section level2">
 <h2>Project Code</h2>
-<div id="prepare-the-r-and-data" class="section level4">
-<h4>Prepare the R and Data</h4>
-<pre class="r"><code>#install.packages(&quot;caret&quot;)
-library(caret)</code></pre>
+<div id="prepare-the-r-env-and-data" class="section level4">
+<h4>Prepare the R env and Data</h4>
+<pre class="r"><code>library(&quot;caret&quot;) </code></pre>
+<pre><code>## Warning: package 'caret' was built under R version 3.1.2</code></pre>
 <pre><code>## Loading required package: lattice
 ## Loading required package: ggplot2</code></pre>
-<pre class="r"><code>set.seed(12345)
+<pre class="r"><code>set.seed(12345) #set seed in random number generator for the sake of reproducibility.
+
 # Download the training and testing data if have not done so.
 #download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, destfil=&quot;./pml-training.csv&quot;,)
 #download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;, destfil=&quot;./pml-testing.csv&quot;,)
-
 
 # Load training and testing data
 # Replace invalid strings as &quot;NA&quot;
@@ -104,7 +107,7 @@ dim(trainingdata)</code></pre>
 training &lt;- trainingdata[,colSums(is.na(testingdata))==0]
 testing &lt;- testingdata[,colSums(is.na(testingdata))==0]
 
-# Delete irrelevent columns first 7 cols
+# Delete irrelevent columns [X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window, num_window]
 training  &lt;-training[,-c(1:7)]
 testing &lt;-testing[,-c(1:7)]
 
@@ -113,79 +116,135 @@ dim(training)</code></pre>
 <pre><code>## [1] 19622    53</code></pre>
 <pre class="r"><code>dim(testing)</code></pre>
 <pre><code>## [1] 20 53</code></pre>
-<pre class="r"><code># Divide training data to subtraining and subtesting
+</div>
+<div id="cross-validation" class="section level4">
+<h4>Cross Validation</h4>
+<p>Split the original training data to <code>subTraining</code>(75%) and <code>subTesting</code>(25%) for cross validation. Fit the model using <code>subTraining</code> data and then predit using <code>subTesting</code> data. The accuracy of prediction should reflect the accuracy of the model.</p>
+<pre class="r"><code># Divide training data to subtraining and subtesting (75% subtraining, 25% subtesting)
 inTrain &lt;- createDataPartition(y=training$classe, p=0.75, list=F,)
 subTraining &lt;- training[inTrain,]
 subTesting &lt;- training[-inTrain,]</code></pre>
 </div>
-<div id="naive-bayes-algorithm" class="section level4">
-<h4>Naive Bayes algorithm</h4>
-<pre class="r"><code># Use naiveBayes model to train and predict
-#install.packages(&quot;e1071&quot;)
-library(e1071)</code></pre>
-<pre><code>## Warning: package 'e1071' was built under R version 3.1.2</code></pre>
-<pre class="r"><code>model_nb &lt;- naiveBayes(classe ~., data=subTraining)
-pred_nb &lt;- predict(model_nb, subTesting, type=&quot;class&quot;)
-# Summarize naiveBayes results. 
-# Accuracy=0.5506, 95% CI(0.5365, 0.5646)
-res_nb &lt;- confusionMatrix(pred_nb,subTesting$classe)
-res_nb</code></pre>
+<div id="try-various-classification-algorithm-for-comparison." class="section level4">
+<h4>Try various classification algorithm for comparison.</h4>
+<p>Reference <a href="http://blog.revolutionanalytics.com/2012/08/cheat-sheet-for-prediction-and-classification-models-in-r.html">http://blog.revolutionanalytics.com/2012/08/cheat-sheet-for-prediction-and-classification-models-in-r.html</a></p>
+</div>
+<div id="decision-tree-algorithm" class="section level4">
+<h4>Decision Tree algorithm</h4>
+<pre class="r"><code>library(&quot;rpart&quot;)
+model_dt &lt;- rpart(classe ~., data=subTraining, method=&quot;class&quot;)
+pred_dt  &lt;- predict(model_dt, subTesting, type=&quot;class&quot;)
+res_dt &lt;- confusionMatrix(pred_dt,subTesting$classe)
+res_dt</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
-## Prediction   A   B   C   D   E
-##          A 411  31  24   1  16
-##          B 112 568  87  25 194
-##          C 623 200 592 302 116
-##          D 209  86 114 360 123
-##          E  40  64  38 116 452
+## Prediction    A    B    C    D    E
+##          A 1260  156   33   40   23
+##          B   52  555   73   52   52
+##          C   24  136  575   83   95
+##          D   40   33  150  513   89
+##          E   19   69   24  116  642
 ## 
 ## Overall Statistics
-##                                       
-##                Accuracy : 0.486       
-##                  95% CI : (0.472, 0.5)
-##     No Information Rate : 0.284       
-##     P-Value [Acc &gt; NIR] : &lt;2e-16      
-##                                       
-##                   Kappa : 0.367       
-##  Mcnemar's Test P-Value : &lt;2e-16      
+##                                        
+##                Accuracy : 0.723        
+##                  95% CI : (0.71, 0.735)
+##     No Information Rate : 0.284        
+##     P-Value [Acc &gt; NIR] : &lt;2e-16       
+##                                        
+##                   Kappa : 0.649        
+##  Mcnemar's Test P-Value : &lt;2e-16       
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.2946    0.599    0.692   0.4478   0.5017
-## Specificity            0.9795    0.894    0.694   0.8702   0.9355
-## Pos Pred Value         0.8509    0.576    0.323   0.4036   0.6366
-## Neg Pred Value         0.7774    0.903    0.914   0.8893   0.8929
-## Prevalence             0.2845    0.194    0.174   0.1639   0.1837
-## Detection Rate         0.0838    0.116    0.121   0.0734   0.0922
-## Detection Prevalence   0.0985    0.201    0.374   0.1819   0.1448
-## Balanced Accuracy      0.6371    0.746    0.693   0.6590   0.7186</code></pre>
+## Sensitivity             0.903    0.585    0.673    0.638    0.713
+## Specificity             0.928    0.942    0.917    0.924    0.943
+## Pos Pred Value          0.833    0.708    0.630    0.622    0.738
+## Neg Pred Value          0.960    0.904    0.930    0.929    0.936
+## Prevalence              0.284    0.194    0.174    0.164    0.184
+## Detection Rate          0.257    0.113    0.117    0.105    0.131
+## Detection Prevalence    0.308    0.160    0.186    0.168    0.177
+## Balanced Accuracy       0.916    0.763    0.795    0.781    0.828</code></pre>
 </div>
-<div id="random-forest-algorithm" class="section level4">
-<h4>Random Forest algorithm</h4>
+<div id="bagging-algorithm" class="section level4">
+<h4>Bagging algorithm</h4>
+<p>Bootstraping Aggregating method.</p>
+<pre class="r"><code>library(&quot;ipred&quot;)</code></pre>
+<pre><code>## Warning: package 'ipred' was built under R version 3.1.2</code></pre>
+<pre class="r"><code>model_bagging &lt;- bagging(classe ~., data=subTraining)
+pred_bagging &lt;- predict(model_bagging, subTesting)
+res_bagging &lt;- confusionMatrix(pred_bagging, subTesting$classe)
+res_bagging </code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1391    6    0    0    0
+##          B    3  936    3    1    1
+##          C    1    7  847   10    4
+##          D    0    0    5  793    6
+##          E    0    0    0    0  890
+## 
+## Overall Statistics
+##                                         
+##                Accuracy : 0.99          
+##                  95% CI : (0.987, 0.993)
+##     No Information Rate : 0.284         
+##     P-Value [Acc &gt; NIR] : &lt;2e-16        
+##                                         
+##                   Kappa : 0.988         
+##  Mcnemar's Test P-Value : NA            
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             0.997    0.986    0.991    0.986    0.988
+## Specificity             0.998    0.998    0.995    0.997    1.000
+## Pos Pred Value          0.996    0.992    0.975    0.986    1.000
+## Neg Pred Value          0.999    0.997    0.998    0.997    0.997
+## Prevalence              0.284    0.194    0.174    0.164    0.184
+## Detection Rate          0.284    0.191    0.173    0.162    0.181
+## Detection Prevalence    0.285    0.192    0.177    0.164    0.181
+## Balanced Accuracy       0.998    0.992    0.993    0.992    0.994</code></pre>
+</div>
+<div id="random-forest-improved-bagging-algorithm" class="section level4">
+<h4>Random Forest (improved bagging) algorithm</h4>
+<p>Improved Bagging algorithm</p>
+<ol style="list-style-type: decimal">
+<li>Boorstrap sampled;</li>
+<li>At each split, bootstrap variables</li>
+<li>Grow multiple trees and vote</li>
+</ol>
+<p>Pros:</p>
+<ul>
+<li>Accuracy</li>
+</ul>
+<p>Cons:</p>
+<ul>
+<li>Slow speed</li>
+<li>Interpretability</li>
+<li>Overfitting -&gt; important to do cross-validation.</li>
+</ul>
 <pre class="r"><code># Use randomForest model to train and predict
 #install.packages(&quot;randomForest&quot;)
-library(randomForest) #Random forest for classification and regression</code></pre>
+library(&quot;randomForest&quot;) #Random forest for classification and regression</code></pre>
 <pre><code>## Warning: package 'randomForest' was built under R version 3.1.2</code></pre>
 <pre><code>## randomForest 4.6-10
 ## Type rfNews() to see new features/changes/bug fixes.</code></pre>
-<pre class="r"><code>model_rf &lt;- randomForest(classe ~., 
-                         data=subTraining,
-                         na.action=na.omit)
+<pre class="r"><code>model_rf &lt;- randomForest(classe ~., data=subTraining, na.action=na.omit)
 pred_rf &lt;- predict(model_rf, subTesting, type=&quot;class&quot;)
-
 # Summarize randomForest results. 
-# Accuracy=0.9955, 95% CI(0.9932, 0.9972)
 res_rf &lt;- confusionMatrix(pred_rf,subTesting$classe)
 res_rf</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1394    6    0    0    0
-##          B    1  938    2    0    0
-##          C    0    5  851    7    1
+##          A 1395    7    0    0    0
+##          B    0  938    3    0    0
+##          C    0    4  850    7    1
 ##          D    0    0    2  797    4
 ##          E    0    0    0    0  896
 ## 
@@ -202,73 +261,32 @@ res_rf</code></pre>
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity             0.999    0.988    0.995    0.991    0.994
+## Sensitivity             1.000    0.988    0.994    0.991    0.994
 ## Specificity             0.998    0.999    0.997    0.999    1.000
-## Pos Pred Value          0.996    0.997    0.985    0.993    1.000
+## Pos Pred Value          0.995    0.997    0.986    0.993    1.000
 ## Neg Pred Value          1.000    0.997    0.999    0.998    0.999
 ## Prevalence              0.284    0.194    0.174    0.164    0.184
-## Detection Rate          0.284    0.191    0.174    0.163    0.183
-## Detection Prevalence    0.285    0.192    0.176    0.164    0.183
+## Detection Rate          0.284    0.191    0.173    0.163    0.183
+## Detection Prevalence    0.286    0.192    0.176    0.164    0.183
 ## Balanced Accuracy       0.999    0.994    0.996    0.995    0.997</code></pre>
-</div>
-<div id="svm-algorithm" class="section level4">
-<h4>SVM algorithm</h4>
-<pre class="r"><code># Use SVM to train and predict
-model_svm &lt;- svm(classe ~., data=subTraining,type=&quot;C-classification&quot;)
-pred_svm &lt;- predict(model_svm, subTesting, type=&quot;class&quot;)
-# Summarize SVM results. 
-# Accuracy= 0.9462, 95% CI(0.9395, 0.9523)
-res_svm &lt;- confusionMatrix(pred_svm,subTesting$classe)
-res_svm</code></pre>
-<pre><code>## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction    A    B    C    D    E
-##          A 1391   78    1    0    0
-##          B    1  841   22    6    4
-##          C    3   30  825   70   28
-##          D    0    0    7  726   23
-##          E    0    0    0    2  846
-## 
-## Overall Statistics
-##                                        
-##                Accuracy : 0.944        
-##                  95% CI : (0.937, 0.95)
-##     No Information Rate : 0.284        
-##     P-Value [Acc &gt; NIR] : &lt;2e-16       
-##                                        
-##                   Kappa : 0.929        
-##  Mcnemar's Test P-Value : NA           
-## 
-## Statistics by Class:
-## 
-##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity             0.997    0.886    0.965    0.903    0.939
-## Specificity             0.977    0.992    0.968    0.993    1.000
-## Pos Pred Value          0.946    0.962    0.863    0.960    0.998
-## Neg Pred Value          0.999    0.973    0.992    0.981    0.986
-## Prevalence              0.284    0.194    0.174    0.164    0.184
-## Detection Rate          0.284    0.171    0.168    0.148    0.173
-## Detection Prevalence    0.300    0.178    0.195    0.154    0.173
-## Balanced Accuracy       0.987    0.939    0.966    0.948    0.969</code></pre>
 </div>
 <div id="select-the-model" class="section level4">
 <h4>Select the model</h4>
-<p>Compare the accuracy of trained model on subTesting data, and choose highest accuracy model (randomForest).</p>
-<pre class="r"><code>df_res &lt;- data.frame(res_nb$overall, res_svm$overall, res_rf$overall)
+<p>Compare the accuracy of trained model on subTesting data, and choose highest accuracy model =&gt; randomForest. We observe slightly accuracy improvement for RandomForest compared with genetic Bagging algorithm.</p>
+<pre class="r"><code>df_res &lt;- data.frame(res_dt$overall, res_bagging$overall, res_rf$overall)
 df_res</code></pre>
-<pre><code>##                res_nb.overall res_svm.overall res_rf.overall
-## Accuracy            4.859e-01          0.9439         0.9943
-## Kappa               3.665e-01          0.9289         0.9928
-## AccuracyLower       4.719e-01          0.9371         0.9918
-## AccuracyUpper       5.000e-01          0.9502         0.9962
-## AccuracyNull        2.845e-01          0.2845         0.2845
-## AccuracyPValue     1.477e-194          0.0000         0.0000
-## McnemarPValue      9.317e-227             NaN            NaN</code></pre>
+<pre><code>##                res_dt.overall res_bagging.overall res_rf.overall
+## Accuracy            7.229e-01              0.9904         0.9943
+## Kappa               6.486e-01              0.9879         0.9928
+## AccuracyLower       7.101e-01              0.9873         0.9918
+## AccuracyUpper       7.354e-01              0.9929         0.9962
+## AccuracyNull        2.845e-01              0.2845         0.2845
+## AccuracyPValue      0.000e+00              0.0000         0.0000
+## McnemarPValue       4.774e-26                 NaN            NaN</code></pre>
 </div>
 <div id="final-prediction-results" class="section level4">
 <h4>Final Prediction Results</h4>
-<p>Apply the randomForest trained model on testing data, and get its testing results.</p>
+<p>Apply the randomForest trained model on testing data, and get its testing results. RandomForest has 99.4% accuracy 95% CI : (0.992, 0.996), so I expect that less than 1 prediction can be wrong in 20 predictions.</p>
 <pre class="r"><code># Predict testing results using trained model
 res &lt;- predict(model_rf, testing, type=&quot;class&quot;)
 res</code></pre>
