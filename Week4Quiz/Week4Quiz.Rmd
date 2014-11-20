@@ -1,0 +1,142 @@
+---
+title: "Quiz 4- Practical Machine Learning Coursera"
+author: "T Xu"
+date: "Tuesday, November 18, 2014"
+output: html_document
+---
+
+###Question 1
+Load the vowel.train and vowel.test data sets:
+```{r}
+library(ElemStatLearn)
+data(vowel.train)
+data(vowel.test) 
+```
+Set the variable y to be a factor variable in both the training and test set. Then set the seed to 33833. Fit (1) a random forest predictor relating the factor variable y to the remaining variables and (2) a boosted predictor using the "gbm" method. Fit these both with the train() command in the caret package. 
+
+What are the accuracies for the two approaches on the test data set? What is the accuracy among the test set samples where the two methods agree?
+```{r}
+vowel.test$y <- as.factor(vowel.test$y)
+vowel.train$y <- as.factor(vowel.train$y)
+
+library(caret)
+set.seed(33833)
+model_rf <- train(y~., data=vowel.train, method="rf")
+model_gbm <- train(y~., data=vowel.train, method="gbm",verbose=F)
+
+pred_rf <- predict(model_rf,vowel.test)
+pred_gbm <- predict(model_gbm,vowel.test)
+
+sum(pred_rf == vowel.test$y)/dim(vowel.test)[1]
+sum(pred_gbm==vowel.test$y)/dim(vowel.test)[1]
+sum(pred_rf==pred_gbm)/dim(vowel.test)[1]
+
+```
+
+###Question 2
+Load the Alzheimer's data using the following commands
+```{r}
+library(caret)
+library(gbm)
+set.seed(3433)
+library(AppliedPredictiveModeling)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+Set the seed to 62433 and predict diagnosis with all the other variables using a random forest ("rf"), boosted trees ("gbm") and linear discriminant analysis ("lda") model. Stack the predictions together using random forests ("rf"). What is the resulting accuracy on the test set? Is it better or worse than each of the individual predictions?
+```{r}
+set.seed(62433)
+model_rf <- train(diagnosis~., data=training,method="rf")
+model_gbm <- train(diagnosis~., data=training, method="gbm",verbose=F)
+model_lda <- train(diagnosis~., data=training,method="lda")
+training_pred_rf <- predict(model_rf,training)
+training_pred_gbm <- predict(model_gbm,training)
+training_pred_lda <- predict(model_lda, training)
+training_combi <- data.frame(diagnosis=training$diagnosis,rf=training_pred_rf,gbm=training_pred_gbm,lda=training_pred_lda)
+model_final <- train(diagnosis~., data=training_combi, method="rf")
+
+pred_rf <- predict(model_rf,testing)
+pred_gbm <- predict(model_gbm, testing)
+pred_lda <- predict(model_lda, testing)
+pred_combi <- data.frame(diagnosis=testing$diagnosis,rf=pred_rf, gbm=pred_gbm,lda=pred_lda)
+pred_final <- predict(model_final,pred_combi)
+library('scales')
+accuracy <- function(x,y){
+  return(percent(sum(x==y)/length(y)))
+}
+
+accuracy(pred_rf,testing$diagnosis)
+accuracy(pred_gbm,testing$diagnosis)
+accuracy(pred_lda,testing$diagnosis)
+accuracy(pred_final,testing$diagnosis)
+
+```
+
+
+###Question 3
+Load the concrete data with the commands:
+```{r}
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+
+```
+Set the seed to 233 and fit a lasso model to predict Compressive Strength. Which variable is the last coefficient to be set to zero as the penalty increases? (Hint: it may be useful to look up ?plot.enet).
+
+```{r}
+#install.packages("elasticnet")
+library(elasticnet)
+set.seed(233)
+model_q3 <- train(CompressiveStrength ~., data=training, method="lasso")
+plot.enet(model_q3$finalModel, xvar="penalty",use.color = TRUE)
+```
+
+
+###Question 4
+Load the data on the number of visitors to the instructors blog from here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/gaData.csv
+
+Using the commands:
+```{r}
+#install.packages("lubridate")
+library(lubridate)
+url="http://d396qusza40orc.cloudfront.net/predmachlearn/gaData.csv"
+download.file(url,destfile="./data_q4.csv")
+dat = read.csv("./data_q4.csv")
+training = dat[year(dat$date) < 2012,]
+testing = dat[(year(dat$date)) > 2011,]
+tstrain = ts(training$visitsTumblr)
+```
+Fit a model using the bats() function in the forecast package to the training time series. Then forecast this model for the remaining time points. For how many of the testing points is the true value within the 95% prediction interval bounds?
+```{r}
+#install.packages("forecast")
+library(forecast)
+model_q4 <- bats(tstrain)
+pred_q4 <- forecast(model_q4, level=95, nrow(testing))
+sum(testing$visitsTumblr>pred_q4$lower &  testing$visitsTumblr<pred_q4$upper)/nrow(testing)
+```
+
+###Question 5
+Load the concrete data with the commands:
+```{r}
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+```
+Set the seed to 325 and fit a support vector machine using the e1071 package to predict Compressive Strength using the default settings. Predict on the testing set. What is the RMSE?
+```{r}
+set.seed(325)
+library(e1071)
+model_q5 <- svm(CompressiveStrength~., training)
+pred_q5 <- predict(model_q5, testing)
+accuracy(pred_q5, testing$CompressiveStrength)
+```
